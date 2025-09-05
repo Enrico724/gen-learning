@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-producer
+  labels:
+    app: book-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-producer
+  template:
+    metadata:
+      labels:
+        app: book-producer
+    spec:
+      initContainers:
+      - name: wait-for-kafka
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z -v -w30 kafka-cluster-kafka-bootstrap:9092; do echo "Waiting for Kafka..."; sleep 2; done;']
+      containers:
+      - name: book-producer
+        image: book-producer
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: kafka-cluster-kafka-bootstrap:9092

@@ -1,0 +1,27 @@
+{
+    "name": "paragraph-enricher",
+    "root": "services/paragraph-enricher",
+    "targets": {
+        "proto": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "protoc --include_imports --descriptor_set_out=./services/prompt-enricher/proto/book_request.desc ./proto/book_request.proto",
+                    "protoc --include_imports --descriptor_set_out=./services/prompt-enricher/proto/enriched_prompt.desc ./proto/enriched_prompt.proto",
+                    "protoc --python_out=./services/prompt-enricher ./proto/book_request.proto",
+                    "protoc --python_out=./services/prompt-enricher ./proto/enriched_prompt.proto"
+                ]
+            }
+        },
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "./services/prompt-enricher",
+                "commands": [
+                    "zip -r ./proto.zip ./proto"
+                ]
+            },
+            "dependsOn": ["proto"]
+        }
+    }
+}

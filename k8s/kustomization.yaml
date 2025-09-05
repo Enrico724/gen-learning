@@ -1,0 +1,11 @@
+resources:
+  - namespace.yaml
+  - kafka
+  - elk
+  - services/book-aggregator.yaml
+  - services/book-producer.yaml
+  - services/instructional-designer.yaml
+  - services/paragraph-enricher.yaml
+  - services/prompt-enricher.yaml
+  - services/spark-master.yaml
+  - services/spark-worker.yaml

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-worker
+  labels:
+    app: spark-worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spark-worker
+  template:
+    metadata:
+      labels:
+        app: spark-worker
+    spec:
+      initContainers:
+      - name: wait-for-spark-master
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z -v -w30 spark-master-svc.genbook.svc.cluster.local 7077; do echo "Waiting for Spark Master..."; sleep 2; done;']
+      containers:
+      - name: spark-worker
+        image: spark-worker
+        command:
+          - "/opt/spark/bin/spark-class"
+          - "org.apache.spark.deploy.worker.Worker"
+        args:
+          - "spark://spark-master-svc:7077"
+        env:
+            - name: SPARK_WORKER_CORES
+              value: "1"
+            - name: SPARK_WORKER_MEMORY
+              value: "2g"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "500Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"

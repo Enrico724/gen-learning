@@ -1,0 +1,18 @@
+{
+  "name": "kafka-book-consumer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "html-to-text": "^9.0.5",
+    "kafkajs": "^2.2.4",
+    "marked": "^16.1.2",
+    "pdfkit": "^0.14.0"
+  }
+}

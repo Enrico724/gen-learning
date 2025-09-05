@@ -1,0 +1,22 @@
+apiVersion: logstash.k8s.elastic.co/v1alpha1
+kind: Logstash
+metadata:
+  name: logstash
+spec:
+  version: 9.1.2
+  count: 1
+  elasticsearchRefs:
+  - name: elasticsearch
+    clusterName: qs
+  config:
+    pipeline.workers: 4
+    log.level: debug
+  volumeClaimTemplates:
+    - metadata:
+        name: logstash-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 250Mi

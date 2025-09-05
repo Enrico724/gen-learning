@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-master
+  labels:
+    app: spark-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-master
+  template:
+    metadata:
+      labels:
+        app: spark-master
+    spec:
+      containers:
+        - name: spark-master
+          image: apache/spark:4.0.0
+          command:
+            - "/opt/spark/bin/spark-class"
+            - "org.apache.spark.deploy.master.Master"
+          env:
+            - name: SPARK_MODE
+              value: master
+          ports:
+            - name: web-ui
+              containerPort: 8080
+              protocol: TCP
+            - name: master-rpc
+              containerPort: 7077
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "500Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+---
+# spark-master-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  # Questo nome sarà parte dell'indirizzo DNS interno del servizio.
+  name: spark-master-svc
+spec:
+  # 'NodePort' espone il servizio su una porta statica su ogni nodo del cluster.
+  # È molto comodo in sviluppo per accedere alla Web UI.
+  # Per produzione, si userebbe 'ClusterIP' (default) o 'LoadBalancer'.
+  type: NodePort
+
+  # Questo selettore è il collegamento magico: il service invierà traffico
+  # a tutti i Pod che hanno l'etichetta "app: spark-master".
+  # DEVE corrispondere alle etichette nel template del Deployment dello Spark Master.
+  selector:
+    app: spark-master
+
+  ports:
+    # Porta per la Web UI del Master
+    - name: web-ui
+      port: 8080        # Porta su cui il servizio è raggiungibile all'interno del cluster
+      targetPort: 8080    # Porta del container a cui inoltrare il traffico
+      nodePort: 30080     # Porta statica (30000-32767) su cui accedere dall'esterno
+      protocol: TCP
+
+    # Porta RPC per la comunicazione tra Master e Worker
+    - name: master-rpc
+      port: 7077
+      targetPort: 7077
+      protocol: TCP

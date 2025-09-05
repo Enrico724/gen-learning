@@ -1,0 +1,49 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: genbook
+build:
+  artifacts:
+    - image: book-aggregator
+      context: services/book-aggregator
+      docker:
+        dockerfile: Dockerfile
+    - image: instructional-designer
+      context: services/instructional-designer
+      docker:
+        dockerfile: Dockerfile
+    - image: paragraph-enricher
+      context: services/paragraph-enricher
+      docker:
+        dockerfile: Dockerfile
+    - image: prompt-enricher
+      context: services/prompt-enricher
+      docker:
+        dockerfile: Dockerfile 
+    - image: book-producer
+      context: services/book-producer
+      docker:
+        dockerfile: Dockerfile
+    - image: spark-worker
+      context: services/spark-worker
+      docker:
+        dockerfile: Dockerfile
+deploy:
+  statusCheck: true
+manifests:
+  kustomize:
+    paths:
+      - .
+profiles:
+  - name: elk
+    manifests:
+      kustomize:
+        paths:
+          - k8s/namespace.yaml
+          - k8s/elk
+  - name: kafka
+    manifests:
+      kustomize:
+        paths:
+          - k8s/namespace.yaml
+          - k8s/kafka

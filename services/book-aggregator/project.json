@@ -1,0 +1,31 @@
+{
+  "name": "book-aggregator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "services/book-aggregator",
+  "projectType": "application",
+  "sourceRoot": "services/book-aggregator/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/target"],
+      "options": {
+        "command": "mvn clean package",
+        "cwd": "services/book-aggregator"
+      },
+      "configurations": {
+        "production": {
+          "command": "mvn clean package -DskipTests"
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "java -jar target/book-aggregator-1.0-SNAPSHOT-jar-with-dependencies.jar",
+        "cwd": "services/book-aggregator"
+      },
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": []
+}

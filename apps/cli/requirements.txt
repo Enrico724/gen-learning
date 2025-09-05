@@ -1,0 +1,3 @@
+confluent-kafka
+dotenv
+confluent-kafka[protobuf,schemaregistry]

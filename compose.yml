@@ -1,0 +1,445 @@
+volumes:
+  state:
+    driver: local
+  checkpoints:
+    driver: local
+  certs:
+    driver: local
+  elasticsearchdata:
+    driver: local
+  kibanadata:
+    driver: local
+  metricbeatdata:
+    driver: local
+  filebeatdata:
+    driver: local
+  logstashdata:
+    driver: local
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+  s3-data:
+    driver: local
+
+services:
+  api-gateway:
+    container_name: api-gateway
+    mem_limit: 512m
+    ports:
+      - "3000:3000"
+    build:
+      context: ./apps/api-gateway
+      dockerfile: Dockerfile
+    depends_on:
+      - kafka
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://user:pass@mongodb:27017
+      - KAFKA_BROKERS=broker:29092
+
+  prompt-enricher:
+    mem_limit: 512m
+    build:
+      context: ./services/prompt-enricher
+      dockerfile: Dockerfile
+    container_name: prompt-enricher
+    environment:
+      - MOCKED_GEN=${MOCKED_GEN}
+      - KAFKA_VERSION=${KAFKA_VERSION}
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - GOOGLE_GENAI_API_KEY=${GOOGLE_GENAI_API_KEY}
+    volumes:
+      - ./services/prompt-enricher:/app
+      - checkpoints:/opt/spark/checkpoints
+    depends_on:
+      - spark-master
+      - spark-worker
+      - init-kafka
+
+  instructional-designer:
+    mem_limit: 512m
+    build:
+      context: ./services/instructional-designer
+      dockerfile: Dockerfile
+    container_name: instructional-designer
+    environment:
+      - MOCKED_GEN=${MOCKED_GEN}
+      - KAFKA_VERSION=${KAFKA_VERSION}
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - GOOGLE_GENAI_API_KEY=${GOOGLE_GENAI_API_KEY}
+    volumes:
+      - checkpoints:/opt/spark/checkpoints
+    depends_on:
+      - spark-master
+      - spark-worker
+      - init-kafka
+
+  paragraph-enricher:
+    mem_limit: 512m
+    build:
+      context: ./services/paragraph-enricher
+      dockerfile: Dockerfile
+    container_name: paragraph-enricher
+    environment:
+      - MOCKED_GEN=${MOCKED_GEN}
+      - KAFKA_VERSION=${KAFKA_VERSION}
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - GOOGLE_GENAI_API_KEY=${GOOGLE_GENAI_API_KEY}
+    volumes:
+      - checkpoints:/opt/spark/checkpoints
+    depends_on:
+      - spark-master
+      - spark-worker
+      - init-kafka
+
+  book_aggregator:
+    mem_limit: 512m
+    restart: on-failure
+    build:
+      context: ./services/book-aggregator
+      dockerfile: Dockerfile
+    container_name: book_aggregator
+    volumes:
+      - state:/opt/kafka-streams/book-aggregator-state
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    depends_on:
+      - spark-master
+      - spark-worker
+      - init-kafka
+
+  book-producer:
+    mem_limit: 512m
+    restart: on-failure
+    build:
+      context: ./services/book-producer
+      dockerfile: Dockerfile
+    container_name: book-producer
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    volumes:
+      - ./services/book-aggregator/pdfs:/app/pdfs
+    depends_on:
+      - kafka
+      - init-kafka
+
+  s3: 
+    mem_limit: 512m
+    container_name: s3
+    image: minio/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - 's3-data:/data'
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=user
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_DEFAULT_BUCKETS=default
+
+  kafka:
+    mem_limit: 1g
+    image: apache/kafka:${KAFKA_VERSION}
+    container_name: broker
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: EXTERNAL://:9092,INTERNAL://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://localhost:9092,INTERNAL://broker:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL # I broker comunicano tra loro sul canale interno
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "./opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server broker:29092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  
+  init-kafka:
+    image: confluentinc/cp-kafka:6.1.1
+    container_name: init-kafka
+    depends_on:
+      - kafka
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      echo -e 'Waiting for kafka to be ready...'
+      kafka-topics --bootstrap-server kafka:29092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic enriched-paragraphs --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic book-queue --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic enriched-prompts --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic book-structures --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic paragraphs --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic generated-books --replication-factor 1 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka:29092 --list
+      "
+
+  kafka-ui:
+    mem_limit: 300m
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    volumes:
+      - ./proto:/etc/kafka-ui/schemas
+    ports:
+      - "8088:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
+      KAFKA_CLUSTERS_0_READONLY: "false"
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  spark-master:
+    mem_limit: 500m
+    image: apache/spark:${SPARK_VERSION}
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+    entrypoint: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+  
+  spark-worker:
+    mem_limit: 512m
+    build:
+      context: ./services/spark-worker
+      dockerfile: Dockerfile
+    deploy:
+      mode: replicated
+      replicas: 5
+    environment:
+      - MOCKED_GEN=${MOCKED_GEN}
+      - SPARK_MODE=worker
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1g
+    entrypoint: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    depends_on:
+    - spark-master
+
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+    user: "0"
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+          exit 1;
+        elif [ x${KIBANA_PASSWORD} == x ]; then
+          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+          exit 1;
+        fi;
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Creating CA";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+        fi;
+        if [ ! -f config/certs/certs.zip ]; then
+          echo "Creating certs";
+          echo -ne \
+          "instances:\n"\
+          "  - name: elasticsearch\n"\
+          "    dns:\n"\
+          "      - elasticsearch\n"\
+          "      - localhost\n"\
+          "    ip:\n"\
+          "      - 127.0.0.1\n"\
+          "  - name: kibana\n"\
+          "    dns:\n"\
+          "      - kibana\n"\
+          "      - localhost\n"\
+          "    ip:\n"\
+          "      - 127.0.0.1\n"\
+          > config/certs/instances.yml;
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+        fi;
+        echo "Setting file permissions"
+        chown -R root:root config/certs;
+        find . -type d -exec chmod 750 \{\} \;;
+        find . -type f -exec chmod 640 \{\} \;;
+        echo "Waiting for Elasticsearch availability";
+        until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+        echo "Setting kibana_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/elasticsearch/elasticsearch.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
+  elasticsearch:
+    container_name: elasticsearch
+    mem_limit: ${ES_MEM_LIMIT}
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
+    labels:
+      co.elastic.logs/module: elasticsearch
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - elasticsearchdata:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/elasticsearch/elasticsearch.key
+      - xpack.security.http.ssl.certificate=certs/elasticsearch/elasticsearch.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.key=certs/elasticsearch/elasticsearch.key
+      - xpack.security.transport.ssl.certificate=certs/elasticsearch/elasticsearch.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.license.self_generated.type=${LICENSE}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+
+  kibana:
+    container_name: kibana
+    mem_limit: ${KB_MEM_LIMIT}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION}
+    labels:
+      co.elastic.logs/module: kibana
+    volumes:
+      - certs:/usr/share/kibana/config/certs
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT}:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  metricbeat:
+    container_name: metricbeat
+    mem_limit: 200m
+    depends_on:
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: docker.elastic.co/beats/metricbeat:${ELASTIC_STACK_VERSION}
+    user: root
+    volumes:
+      - certs:/usr/share/metricbeat/certs
+      - metricbeatdata:/usr/share/metricbeat/data
+      - "./config/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://elasticsearch:9200
+      - KIBANA_HOSTS=http://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash:9600
+
+  logstash:
+    container_name: logstash
+    mem_limit: 1g
+    ports:
+      - "5959:5959/tcp"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: docker.elastic.co/logstash/logstash:${ELASTIC_STACK_VERSION}
+    labels:
+      co.elastic.logs/module: logstash
+    user: root
+    volumes:
+      - certs:/usr/share/logstash/certs
+      - logstashdata:/usr/share/logstash/data
+      - "./config/logstash/ingest_data/:/usr/share/logstash/ingest_data/"
+      - "./config/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
+    environment:
+      - xpack.monitoring.enabled=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://elasticsearch:9200
+      - KAFKA_HOSTS=broker:29092
+
+  mongodb:
+    container_name: mongodb
+    mem_limit: 512m
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+
+  kibana-setup:
+    image: curlimages/curl:latest
+    container_name: kibana-setup
+    volumes:
+      - ./config/kibana:/usr/share/kibana_assets:ro
+    command: sh /usr/share/kibana_assets/setup.sh
+    depends_on:
+      - kibana

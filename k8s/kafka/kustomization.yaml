@@ -1,0 +1,9 @@
+resources:
+  - kafka-cluster.yaml
+  - kafka-ui.yaml
+  - topic/book-queue.yaml
+  - topic/book-structures.yaml
+  - topic/enriched-paragraphs.yaml
+  - topic/paragraphs.yaml
+  - topic/generated-books.yaml
+  - topic/enriched-prompts.yaml

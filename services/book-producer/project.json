@@ -1,0 +1,14 @@
+{
+  "name": "kafka-book-consumer",
+  "root": "services/book-producer",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./services/book-producer/main.js"
+      }
+    }
+  },
+  "tags": []
+}

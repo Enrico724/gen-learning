@@ -1,0 +1,39 @@
+{
+  "name": "cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "apps/cli",
+  "projectType": "application",
+  "targets": {
+    "proto": {
+        "executor": "nx:run-commands",
+        "options": {
+            "command": "protoc --python_out=./apps/cli ./proto/book_request.proto"
+        }
+    },
+    "install-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./apps/cli/.venv/bin/python -m pip install -r ./apps/cli/requirements.txt"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./apps/cli/.venv/bin/pytest"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./apps/cli/.venv/bin/flake8"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./apps/cli/.venv/bin/python ./apps/cli/main.py"
+      },
+      "dependsOn": ["install-deps", "proto"]
+    }
+  }
+}

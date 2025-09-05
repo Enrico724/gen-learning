@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: instructional-designer
+  labels:
+    app: instructional-designer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: instructional-designer
+  template:
+    metadata:
+      labels:
+        app: instructional-designer
+    spec:
+      containers:
+      - name: instructional-designer
+        image: instructional-designer
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: kafka-cluster-kafka-bootstrap:9092

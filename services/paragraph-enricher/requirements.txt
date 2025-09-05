@@ -1,0 +1,4 @@
+pyspark==4.0.0
+google-genai
+dotenv
+confluent-kafka

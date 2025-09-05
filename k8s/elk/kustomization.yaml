@@ -1,0 +1,4 @@
+resources:
+  - elasticsearch.yaml
+  - logstash.yaml
+  - kibana.yaml

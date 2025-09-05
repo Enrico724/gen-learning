@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prompt-enricher
+  labels:
+    app: prompt-enricher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prompt-enricher
+  template:
+    metadata:
+      labels:
+        app: prompt-enricher
+    spec:
+      containers:
+      - name: prompt-enricher
+        image: prompt-enricher
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: kafka-cluster-kafka-bootstrap:9092
