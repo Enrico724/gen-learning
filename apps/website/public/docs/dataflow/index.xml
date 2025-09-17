@@ -1,0 +1,84 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GenLearning – </title>
+    <link>http://localhost:1313/docs/dataflow/</link>
+    <description>Recent content on GenLearning</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	  <atom:link href="http://localhost:1313/docs/dataflow/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/dataflow/genbook/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/dataflow/genbook/</guid>
+      <description>
+        
+        
+        &lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  flowchart TD
+     subgraph Interazione con l&amp;#39;Utente
+          A[App / CLI] --&amp;gt;|Crea Richiesta GenBook| B[Gateway API]
+     end
+
+     subgraph Nucleo del Sistema
+          B --&amp;gt;|Genera ID Lavoro, Crea Stato GenBook| C[MongoDB]
+          B --&amp;gt;|Pubblica Lavoro su Kafka| D[Topic Kafka: book-queue]
+     end
+
+     subgraph Pipeline di Elaborazione Kafka
+          D --&amp;gt;|Consuma Lavoro| E[prompt-enricher]
+          E --&amp;gt;|Espande il prompt con link| E
+          E --&amp;gt;|Pubblica prompt arricchito| F[Topic Kafka: enriched_prompts]
+
+          F --&amp;gt;|Consuma prompt arricchito| G[instructional-designer]
+          G --&amp;gt;|Genera struttura libro e info arricchimento paragrafi| G
+          G --&amp;gt;|Pubblica struttura libro| H[Topic Kafka: book-structure]
+          G --&amp;gt;|Pubblica info arricchimento paragrafi| I[Topic Kafka: paragraph-enrichment]
+
+          I --&amp;gt;|Consuma info arricchimento paragrafi| J[paragraph-enricher]
+          J --&amp;gt;|Genera testo Markdown dalle info| J
+          J --&amp;gt;|Pubblica paragrafo arricchito| K[Topic Kafka: enriched-paragraphs]
+     end
+
+     subgraph Aggregazione Finale
+          H --&amp;gt;|Consuma struttura libro| L[book-aggregator]
+          K --&amp;gt;|Consuma paragrafi arricchiti| L
+          L --&amp;gt;|Aggrega e costruisce il libro finale| L
+          L --&amp;gt;|Pubblica libro finale| M[Topic Kafka: generated-books]
+          M --&amp;gt;|Aggiorna Stato GenBook in MongoDB| C
+     end
+
+     subgraph Archiviazione dei Dati e Logging
+          C -- Stato GenBook --&amp;gt; X{Dati}
+          subgraph Stack ELK
+                E --&amp;gt; Z[Logstash]
+                G --&amp;gt; Z
+                J --&amp;gt; Z
+                L --&amp;gt; Z
+                Z --&amp;gt; Y[Elasticsearch]
+          end
+     end
+&lt;/pre&gt;&lt;h1&gt;Documentazione del Flusso di Dati di GenBook&lt;/h1&gt;&lt;h2&gt;Panoramica&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;panoramica&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#panoramica&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Questo documento descrive il flusso di dati del sistema GenBook, basandosi sul diagramma del flusso di dati. Il sistema è suddiviso in quattro sezioni principali:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Interazione con l&amp;rsquo;Utente&lt;/strong&gt;: L&amp;rsquo;utente interagisce con il sistema tramite un&amp;rsquo;applicazione o CLI, avviando la creazione di una richiesta GenBook che viene gestita dal Gateway API.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Nucleo del Sistema&lt;/strong&gt;: Il Gateway API genera un ID lavoro unico, aggiorna lo stato in MongoDB e pubblica il lavoro su un topic Kafka per l&amp;rsquo;elaborazione.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Pipeline di Elaborazione Kafka&lt;/strong&gt;: Una serie di microservizi elabora i dati, arricchendo i prompt, generando la struttura del libro e i paragrafi arricchiti.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Aggregazione Finale e Archiviazione&lt;/strong&gt;: I dati vengono aggregati per costruire il libro finale, pubblicati su un topic Kafka e archiviati in MongoDB. I log vengono raccolti dallo stack ELK per il monitoraggio.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Ogni componente e processo è rappresentato nel diagramma sopra.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

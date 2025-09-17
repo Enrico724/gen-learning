@@ -1,0 +1,240 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GenLearning – </title>
+    <link>http://localhost:1313/docs/infrastruttura/</link>
+    <description>Recent content on GenLearning</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	  <atom:link href="http://localhost:1313/docs/infrastruttura/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/infrastruttura/kafka/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/infrastruttura/kafka/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Topic di Kafka&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;topic-di-kafka&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#topic-di-kafka&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Riquadro per raggruppare i topic di Kafka
+    subgraph KAFKA
+        direction TB;
+
+        %% Lista dei topic (ovals)
+        t1(book-queue);
+        t2(enriched-prompt);
+        t3(book-structures);
+        t4(paragraphs);
+        t5(enriched-paragraphs);
+        t6(generated-books);
+    end
+&lt;/pre&gt;&lt;p&gt;I topic di Kafka rappresentano i canali di comunicazione utilizzati per lo scambio di messaggi tra i vari microservizi. Ogni topic è identificato da un nome univoco e funge da buffer per i dati che vengono prodotti e consumati dai servizi. Nel diagramma sopra, i topic sono rappresentati come ovali e sono raggruppati all&amp;rsquo;interno del riquadro &amp;ldquo;KAFKA&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Ecco una breve descrizione dei topic:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;book-queue&lt;/strong&gt;: Contiene le richieste iniziali inviate dall&amp;rsquo;API Gateway.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;enriched-prompt&lt;/strong&gt;: Memorizza i prompt arricchiti dal microservizio &lt;code&gt;prompt-enricher&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;book-structures&lt;/strong&gt;: Contiene le strutture dei libri generate dal microservizio &lt;code&gt;instructional-designer&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;paragraphs&lt;/strong&gt;: Raccoglie i paragrafi generati dal microservizio &lt;code&gt;instructional-designer&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;enriched-paragraphs&lt;/strong&gt;: Contiene i paragrafi arricchiti dal microservizio &lt;code&gt;paragraph-enricher&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;generated-books&lt;/strong&gt;: Memorizza i libri completi generati dal microservizio &lt;code&gt;book-aggregator&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Flusso lavorativo&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-lavorativo&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-lavorativo&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Start
+    api_gateway[API Gateway];
+
+    %% Topics (ovals)
+    t1(book-queue);
+    t2(enriched-prompt);
+    t3(book-structures);
+    t4(paragraphs);
+    t5(enriched-paragraphs);
+    t6(generated-books);
+
+    %% Microservices (rectangles)
+    ms1[prompt-enricher];
+    ms2[instructional-designer];
+    ms3[paragraph-enricher];
+    ms4[book-aggregator];
+    ms5[book-producer];
+
+    %% Flow
+    api_gateway --&amp;gt; t1;
+    t1 --&amp;gt; ms1;
+    ms1 --&amp;gt; t2;
+    t2 --&amp;gt; ms2;
+    ms2 --&amp;gt; t3;
+    ms2 --&amp;gt; t4;
+    t4 --&amp;gt; ms3;
+    ms3 --&amp;gt; t5;
+    t3 --&amp;gt; ms4;
+    t5 --&amp;gt; ms4;
+    ms4 --&amp;gt; t6;
+    t6 --&amp;gt; ms5;
+&lt;/pre&gt;&lt;p&gt;Il flusso lavorativo illustra come i dati si muovono attraverso i vari microservizi e i topic di Kafka. Ecco una descrizione passo-passo del processo:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;API Gateway&lt;/strong&gt;: Riceve le richieste iniziali e le invia al topic &lt;code&gt;book-queue&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Prompt Enricher&lt;/strong&gt;: Consuma i messaggi da &lt;code&gt;book-queue&lt;/code&gt;, arricchisce i prompt e li pubblica su &lt;code&gt;enriched-prompt&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Instructional Designer&lt;/strong&gt;: Consuma i prompt arricchiti da &lt;code&gt;enriched-prompt&lt;/code&gt; e genera sia le strutture dei libri (&lt;code&gt;book-structures&lt;/code&gt;) che i paragrafi (&lt;code&gt;paragraphs&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Paragraph Enricher&lt;/strong&gt;: Consuma i paragrafi da &lt;code&gt;paragraphs&lt;/code&gt;, li arricchisce e li pubblica su &lt;code&gt;enriched-paragraphs&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Book Aggregator&lt;/strong&gt;: Combina le strutture dei libri (&lt;code&gt;book-structures&lt;/code&gt;) e i paragrafi arricchiti (&lt;code&gt;enriched-paragraphs&lt;/code&gt;) per creare libri completi, che vengono pubblicati su &lt;code&gt;generated-books&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Book Producer&lt;/strong&gt;: Consuma i libri completi da &lt;code&gt;generated-books&lt;/code&gt; e li rende disponibili per ulteriori utilizzi o distribuzione.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Questo flusso garantisce una pipeline modulare e scalabile per la generazione e l&amp;rsquo;arricchimento dei contenuti. Ogni microservizio è responsabile di un compito specifico, facilitando la manutenzione e l&amp;rsquo;estensibilità del sistema.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/infrastruttura/spark/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/infrastruttura/spark/</guid>
+      <description>
+        
+        
+        &lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    subgraph &amp;#34;Sorgente Dati&amp;#34;
+        kafka[Kafka]
+    end
+
+    subgraph &amp;#34;Microservizi Driver Spark&amp;#34;
+        prompt_enricher[&amp;#34;prompt-enricher&amp;#34;]
+        instructional_designer[&amp;#34;instructional-designer&amp;#34;]
+        paragraph_enricher[&amp;#34;paragraph-enricher&amp;#34;]
+    end
+
+    subgraph &amp;#34;Processing &amp;amp; AI&amp;#34;
+        spark[Spark]
+        gemini[Gemini API]
+    end
+
+    %% Flusso da Kafka ai microservizi
+    kafka &amp;lt;--&amp;gt; prompt_enricher;
+    kafka &amp;lt;--&amp;gt; instructional_designer;
+    kafka &amp;lt;--&amp;gt; paragraph_enricher;
+
+    %% Flusso dai microservizi a Spark
+    prompt_enricher --&amp;gt; spark;
+    instructional_designer --&amp;gt; spark;
+    paragraph_enricher --&amp;gt; spark;
+
+    %% Flusso da Spark a Gemini
+    spark --&amp;gt; gemini;
+&lt;/pre&gt;&lt;h3&gt;Documentazione Spark&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;documentazione-spark&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#documentazione-spark&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Questo documento descrive l&amp;rsquo;architettura e il flusso di dati che coinvolgono Spark all&amp;rsquo;interno del nostro sistema. La configurazione utilizza Kafka 4.0.0 come sorgente dati e PySpark per l&amp;rsquo;elaborazione.&lt;/p&gt;
+&lt;h4&gt;Flusso dei Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dei-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dei-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Sorgente Dati&lt;/strong&gt;: I dati vengono acquisiti da Kafka, che funge da sistema di messaggistica distribuito.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Microservizi Driver Spark&lt;/strong&gt;: I dati vengono elaborati da tre microservizi:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;prompt-enricher&lt;/code&gt;: Arricchisce i dati con informazioni aggiuntive.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;instructional-designer&lt;/code&gt;: Progetta istruzioni basate sui dati.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;paragraph-enricher&lt;/code&gt;: Migliora i paragrafi con contenuti generati.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Processing &amp;amp; AI&lt;/strong&gt;: I dati elaborati dai microservizi vengono inviati a Spark per ulteriori trasformazioni e analisi. Infine, i risultati vengono inviati all&amp;rsquo;API Gemini per l&amp;rsquo;integrazione con i sistemi di intelligenza artificiale.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4&gt;Tecnologie Utilizzate&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;tecnologie-utilizzate&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tecnologie-utilizzate&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Kafka 4.0.0&lt;/strong&gt;: Utilizzato per la gestione dei flussi di dati in tempo reale.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PySpark&lt;/strong&gt;: Libreria Python per l&amp;rsquo;elaborazione distribuita dei dati con Apache Spark.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;Note&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;note&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#note&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Assicurarsi che i microservizi siano configurati per leggere e scrivere correttamente da e verso Kafka.&lt;/li&gt;
+&lt;li&gt;Verificare che Spark sia configurato per ricevere input dai microservizi e inviare output all&amp;rsquo;API Gemini.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Questa architettura garantisce un&amp;rsquo;elaborazione scalabile e modulare dei dati, sfruttando le potenzialità di Kafka e Spark.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>ELK Stack</title>
+      <link>http://localhost:1313/docs/infrastruttura/elk/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/infrastruttura/elk/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Flusso Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Definiamo i nodi di input (topics)
+    topic1(enriched-prompts);
+    topic2(enriched-paragraphs);
+    topic3(book-structures);
+
+    %% Definiamo i servizi
+    logstash_service[Logstash];
+    elasticsearch_service[Elasticsearch];
+    kibana_service[Kibana];
+
+    %% Definiamo il flusso
+    topic1 --&amp;gt; logstash_service;
+    topic2 --&amp;gt; logstash_service;
+    topic3 --&amp;gt; logstash_service;
+    logstash_service --&amp;gt; elasticsearch_service;
+    elasticsearch_service --&amp;gt; kibana_service;
+&lt;/pre&gt;&lt;h3&gt;Descrizione del Flusso&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;descrizione-del-flusso&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#descrizione-del-flusso&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Il grafico sopra rappresenta il flusso dei dati all&amp;rsquo;interno dello stack ELK (Elasticsearch, Logstash, Kibana). Ecco una descrizione dettagliata di ogni componente e del loro ruolo:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Topics di Input&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;enriched-prompts&lt;/code&gt;: Contiene i dati relativi ai prompt arricchiti.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;enriched-paragraphs&lt;/code&gt;: Contiene i paragrafi arricchiti.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;book-structures&lt;/code&gt;: Contiene le strutture dei libri.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Questi dati rappresentano i punti di ingresso nel sistema.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Logstash&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Logstash è il servizio responsabile dell&amp;rsquo;elaborazione e della trasformazione dei dati in ingresso. Riceve i dati dai topics di input e li prepara per l&amp;rsquo;indicizzazione.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Elasticsearch&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Elasticsearch è il motore di ricerca e analisi che memorizza i dati elaborati da Logstash. Consente di eseguire ricerche rapide e analisi sui dati.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Kibana&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kibana è l&amp;rsquo;interfaccia utente che consente di visualizzare e analizzare i dati memorizzati in Elasticsearch. Fornisce dashboard interattivi e strumenti di visualizzazione.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Utilizzo&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;utilizzo&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#utilizzo&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Questo flusso è utile per gestire grandi quantità di dati strutturati e non strutturati, consentendo di trasformarli, indicizzarli e analizzarli in modo efficiente. Lo stack ELK è comunemente utilizzato per il monitoraggio, l&amp;rsquo;analisi dei log e la business intelligence.&lt;/p&gt;
+&lt;h3&gt;Vantaggi&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;vantaggi&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#vantaggi&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Scalabilità&lt;/strong&gt;: Lo stack ELK può gestire grandi volumi di dati.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Flessibilità&lt;/strong&gt;: Supporta diversi tipi di dati e consente personalizzazioni.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Visualizzazione Intuitiva&lt;/strong&gt;: Kibana offre strumenti di visualizzazione potenti e facili da usare.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Conclusione&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;conclusione&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#conclusione&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Lo stack ELK è una soluzione completa per la gestione e l&amp;rsquo;analisi dei dati. Il flusso descritto nel grafico rappresenta un esempio di come i dati possono essere trasformati e analizzati per ottenere informazioni utili.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,143 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GenLearning – </title>
+    <link>http://localhost:1313/docs/apps/</link>
+    <description>Recent content on GenLearning</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	  <atom:link href="http://localhost:1313/docs/apps/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/apps/api-gateway/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/apps/api-gateway/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;API Gateway&lt;/h1&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+
+    %% Inizio del flusso
+    request[Richiesta Utente] --&amp;gt; api_gateway[API Gateway];
+    
+    %% L&amp;#39;API Gateway invia i dati a due destinazioni
+    api_gateway --&amp;gt; kafka[Kafka];
+    api_gateway --&amp;gt; mongodb[MongoDB];
+&lt;/pre&gt;&lt;h2&gt;Descrizione&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;descrizione&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#descrizione&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;L&amp;rsquo;API Gateway, sviluppato con il framework NestJS, funge da punto di ingresso centrale per tutte le richieste verso i servizi backend. Consente di gestire, monitorare e ottimizzare il traffico API, migliorando la sicurezza e le prestazioni.&lt;/p&gt;
+&lt;h2&gt;Funzionalità principali&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;funzionalità-principali&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#funzionalit%c3%a0-principali&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;1. &lt;strong&gt;Routing delle richieste&lt;/strong&gt;&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;1-routing-delle-richieste&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#1-routing-delle-richieste&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Instradamento delle richieste verso i servizi backend appropriati.&lt;/li&gt;
+&lt;li&gt;Supporto per regole di routing basate su URL, intestazioni o parametri.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;2. &lt;strong&gt;Trasformazione delle Richieste e Risposte&lt;/strong&gt;&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;2-trasformazione-delle-richieste-e-risposte&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#2-trasformazione-delle-richieste-e-risposte&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Supporto esclusivo per il formato JSON.&lt;/li&gt;
+&lt;li&gt;Validazione automatica dei dati in ingresso.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Installazione&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;installazione&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#installazione&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Questo progetto si trova all&amp;rsquo;interno della monorepo nella directory &lt;code&gt;apps/api-gateway&lt;/code&gt;.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Per installare le dipendenze, eseguire:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;npm install&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Per avviare l&amp;rsquo;applicazione, eseguire:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;npm run start:dev&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/apps/app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/apps/app/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;Descrizione dell&amp;rsquo;App&lt;/h1&gt;&lt;p&gt;Questa applicazione è progettata per semplificare la gestione delle attività quotidiane. Offre agli utenti la possibilità di creare, organizzare e monitorare le proprie attività, rendendo più semplice e intuitivo il raggiungimento degli obiettivi personali.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Nota&lt;/strong&gt;: Questa applicazione è in fase di sviluppo utilizzando Flutter e fa parte di un progetto di tesi.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;Funzionalità principali&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;funzionalità-principali&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#funzionalit%c3%a0-principali&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Creazione di attività&lt;/strong&gt;: Permette di aggiungere nuove attività con dettagli personalizzati.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Organizzazione per categorie&lt;/strong&gt;: Consente di suddividere le attività in categorie per una gestione più efficiente.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Monitoraggio dei progressi&lt;/strong&gt;: Fornisce statistiche e aggiornamenti sul completamento delle attività.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Obiettivo&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;obiettivo&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#obiettivo&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;L&amp;rsquo;obiettivo principale dell&amp;rsquo;app è aiutare gli utenti a migliorare la produttività e a gestire meglio il proprio tempo.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Per ulteriori dettagli, consulta la documentazione completa.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/apps/cli/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/apps/cli/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;Documentazione dell&amp;rsquo;App CLI&lt;/h1&gt;&lt;h2&gt;Panoramica&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;panoramica&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#panoramica&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;L&amp;rsquo;app CLI si trova in &lt;code&gt;apps/cli&lt;/code&gt; all&amp;rsquo;interno di questa monorepo. Avviala con:&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;python apps/cli&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Consulta la figura per un esempio.&lt;/p&gt;
+&lt;p&gt;
+    &lt;img src=&#34;../cli-screenshot.png&#34; alt=&#34;alt text&#34;  loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

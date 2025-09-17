@@ -3,6 +3,8 @@
 .nx/workspace-data
 .env
 
+/services/book-aggregator/pdfs
+
 __pycache__
 node_modules
 target

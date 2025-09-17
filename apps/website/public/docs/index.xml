@@ -1,0 +1,775 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GenLearning – Documentazione</title>
+    <link>http://localhost:1313/docs/</link>
+    <description>Recent content in Documentazione on GenLearning</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	  <atom:link href="http://localhost:1313/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/microservizi/prompt-enricher/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/microservizi/prompt-enricher/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Flusso Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Definiamo i nodi: due topic e un microservizio
+    topic_in(&amp;#34;book-queue&amp;#34;);
+    microservice[&amp;#34;prompt-enricher&amp;#34;];
+    topic_out(&amp;#34;enriched-prompts&amp;#34;);
+    
+    %% Definiamo il flusso
+    topic_in --&amp;gt; microservice;
+    microservice --&amp;gt; topic_out;
+
+    style microservice fill:#cce5ff,stroke:#3366cc,stroke-width:2px,color:#000;
+    style topic_in fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style topic_out fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+&lt;/pre&gt;&lt;p&gt;Da Kafka riceviamo&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;job_id&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;prompt&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;timestamp&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Per poi ottenere dopo un&amp;rsquo;elaborazione un dato che inseriremo nel topic di output di Kafka.&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;job_id&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;enriched_prompt&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;duration_ms&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;metrics&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;original_prompt_length&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;enriched_prompt_length&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;links_processed&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;links_failed&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;error&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Il topic &lt;code&gt;enriched-prompts&lt;/code&gt; conterrà quindi tutti i dati elaborati dal microservizio.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/microservizi/instructional-designer/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/microservizi/instructional-designer/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Flusso Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Definiamo i nodi
+    topic_in(&amp;#34;enriched-prompt&amp;#34;);
+    microservice[&amp;#34;instructional-designer&amp;#34;];
+    topic_out1(&amp;#34;book-structures&amp;#34;);
+    topic_out2(&amp;#34;paragraphs&amp;#34;);
+    
+    %% Definiamo il flusso
+    topic_in --&amp;gt; microservice;
+    microservice --&amp;gt; topic_out1;
+    microservice --&amp;gt; topic_out2;
+
+    style microservice fill:#cce5ff,stroke:#3366cc,stroke-width:2px,color:#000;
+    style topic_in fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style topic_out1 fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style topic_out2 fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+&lt;/pre&gt;&lt;p&gt;Da Kafka riceviamo&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;job_id&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;enriched_prompt&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Altri campi non rilevanti per il microservizio vengono ignorati
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Per poi ottenere dopo un&amp;rsquo;elaborazione un dato che inseriremo nel topic di output di Kafka per le strutture del libro.&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;titolo_libro&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;capitoli&amp;#34;&lt;/span&gt;: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;titolo_capitolo&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;sottocapitoli&amp;#34;&lt;/span&gt;: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;UUID&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;UUID&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;UUID&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;...&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            ]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;metrics&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;chapter_qty&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;subchapter_qty&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;paragraphs&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;duration_ms&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Mentre sul topic dei paragrafi da generare&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;paragraph_id&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;titolo_paragrafo&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;testo_segnaposto&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;enrichment_info&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;focus&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;tipo_arricchimento&amp;#34;&lt;/span&gt;: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;parole_chiave&amp;#34;&lt;/span&gt;: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;domande_guida&amp;#34;&lt;/span&gt;: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;livello_dettaglio&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/microservizi/paragraph-enricher/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/microservizi/paragraph-enricher/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;Flusso Dati&lt;/h1&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    topic_in(paragraphs);
+    microservice[paragraph-enricher];
+    topic_out(enriched-paragraphs);
+    
+    topic_in --&amp;gt; microservice;
+    microservice --&amp;gt; topic_out;
+
+    style microservice fill:#cce5ff,stroke:#3366cc,stroke-width:2px,color:#000;
+    style topic_in fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style topic_out fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+&lt;/pre&gt;&lt;p&gt;Da Kafka riceviamo&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;paragraph_id&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;titolo_paragrafo&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;testo_segnaposto&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;enrichment_info&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;focus&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;tipo_arricchimento&amp;#34;&lt;/span&gt;: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;parole_chiave&amp;#34;&lt;/span&gt;: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;domande_guida&amp;#34;&lt;/span&gt;: [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;livello_dettaglio&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Dopo l&amp;rsquo;elaborazione, otteniamo un dato che viene inserito direttamente nel topic di output di Kafka e che include anche le metriche relative al paragrafo generato.&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;paragraph_id&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;enriched_paragraph&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;String&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;metrics&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;duration_ms&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;paragraph_length&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Integer&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/microservizi/book-aggregator/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/microservizi/book-aggregator/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Flusso Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    topic_in1(book-structures);
+    topic_in2(enriched-paragraphs);
+    microservice[book-aggregator];
+    topic_out(generated-books);
+    
+    %% Definiamo il flusso
+    topic_in1 --&amp;gt; microservice;
+    topic_in2 --&amp;gt; microservice;
+    microservice --&amp;gt; topic_out;
+
+    style microservice fill:#cce5ff,stroke:#3366cc,stroke-width:2px,color:#000;
+    style topic_in1 fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style topic_in2 fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style topic_out fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    
+&lt;/pre&gt;&lt;h3&gt;Descrizione del Flusso&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;descrizione-del-flusso&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#descrizione-del-flusso&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Il diagramma sopra rappresenta il flusso dati del microservizio &lt;code&gt;book-aggregator&lt;/code&gt;. Questo microservizio si occupa di aggregare e trasformare i dati provenienti da due topic di input per generare un output consolidato.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Input&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;book-structures&lt;/code&gt;: Contiene le strutture base dei libri.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;enriched-paragraphs&lt;/code&gt;: Contiene paragrafi arricchiti con metadati o contenuti aggiuntivi.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Elaborazione&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Il microservizio &lt;code&gt;book-aggregator&lt;/code&gt; riceve i dati dai due topic di input e li combina per creare una rappresentazione completa e coerente del libro.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Output&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;generated-books&lt;/code&gt;: Il risultato finale è un topic che contiene i libri generati pronti per essere utilizzati da altri sistemi o microservizi.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Dettagli Implementativi&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;dettagli-implementativi&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dettagli-implementativi&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Tecnologie Utilizzate&lt;/strong&gt;: Il microservizio è implementato utilizzando Java e si basa su Spark Kafka Streaming.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Scalabilità e Monitoraggio&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;scalabilità-e-monitoraggio&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#scalabilit%c3%a0-e-monitoraggio&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Scalabilità&lt;/strong&gt;: Il sistema sfrutta Apache Spark per l&amp;rsquo;elaborazione distribuita e Apache Kafka per la gestione dei topic, garantendo la capacità di gestire grandi volumi di dati attraverso meccanismi di partizionamento e bilanciamento del carico.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Monitoraggio&lt;/strong&gt;: Per garantire il corretto funzionamento del flusso e identificare eventuali problemi, è stato implementato un sistema di monitoraggio basato su ELK (Elasticsearch, Logstash, e Kibana).&lt;/li&gt;
+&lt;/ul&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>Book Producer</title>
+      <link>http://localhost:1313/docs/microservizi/book-producer/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/microservizi/book-producer/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Flusso Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Il microservizio &lt;strong&gt;book-producer&lt;/strong&gt; è responsabile della generazione di file PDF a partire dai dati ricevuti. Il flusso dei dati è rappresentato nel diagramma seguente:&lt;/p&gt;
+&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Definiamo i nodi
+    %% La sintassi (testo) crea un nodo con angoli arrotondati (ovale)
+    topic_in(generated-books);
+    microservice[book-producer];
+    s3[&amp;#34;Bucket Storage&amp;#34;]
+    
+    %% Definiamo il flusso
+    topic_in --&amp;gt; microservice;
+    microservice --&amp;gt; s3
+
+    style microservice fill:#cce5ff,stroke:#3366cc,stroke-width:2px,color:#000;
+    style topic_in fill:#ffcccc,stroke:#cc3333,stroke-width:2px,color:#000;
+    style s3 fill:#f2f2f2,stroke:#595959,stroke-width:2px,color:#000;
+    
+&lt;/pre&gt;&lt;h3&gt;Dettagli del Flusso&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;dettagli-del-flusso&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dettagli-del-flusso&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Input&lt;/strong&gt;: Il microservizio riceve i dati dal topic &lt;code&gt;generated-books&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Elaborazione&lt;/strong&gt;: I dati vengono processati dal microservizio &lt;code&gt;book-producer&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: Il risultato dell&amp;rsquo;elaborazione è un file PDF generato.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Questo microservizio è un componente chiave per la produzione di documenti PDF automatizzati.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/apps/api-gateway/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/apps/api-gateway/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;API Gateway&lt;/h1&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+
+    %% Inizio del flusso
+    request[Richiesta Utente] --&amp;gt; api_gateway[API Gateway];
+    
+    %% L&amp;#39;API Gateway invia i dati a due destinazioni
+    api_gateway --&amp;gt; kafka[Kafka];
+    api_gateway --&amp;gt; mongodb[MongoDB];
+&lt;/pre&gt;&lt;h2&gt;Descrizione&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;descrizione&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#descrizione&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;L&amp;rsquo;API Gateway, sviluppato con il framework NestJS, funge da punto di ingresso centrale per tutte le richieste verso i servizi backend. Consente di gestire, monitorare e ottimizzare il traffico API, migliorando la sicurezza e le prestazioni.&lt;/p&gt;
+&lt;h2&gt;Funzionalità principali&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;funzionalità-principali&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#funzionalit%c3%a0-principali&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;1. &lt;strong&gt;Routing delle richieste&lt;/strong&gt;&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;1-routing-delle-richieste&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#1-routing-delle-richieste&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Instradamento delle richieste verso i servizi backend appropriati.&lt;/li&gt;
+&lt;li&gt;Supporto per regole di routing basate su URL, intestazioni o parametri.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;2. &lt;strong&gt;Trasformazione delle Richieste e Risposte&lt;/strong&gt;&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;2-trasformazione-delle-richieste-e-risposte&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#2-trasformazione-delle-richieste-e-risposte&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Supporto esclusivo per il formato JSON.&lt;/li&gt;
+&lt;li&gt;Validazione automatica dei dati in ingresso.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Installazione&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;installazione&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#installazione&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Questo progetto si trova all&amp;rsquo;interno della monorepo nella directory &lt;code&gt;apps/api-gateway&lt;/code&gt;.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Per installare le dipendenze, eseguire:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;npm install&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Per avviare l&amp;rsquo;applicazione, eseguire:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;npm run start:dev&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/apps/app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/apps/app/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;Descrizione dell&amp;rsquo;App&lt;/h1&gt;&lt;p&gt;Questa applicazione è progettata per semplificare la gestione delle attività quotidiane. Offre agli utenti la possibilità di creare, organizzare e monitorare le proprie attività, rendendo più semplice e intuitivo il raggiungimento degli obiettivi personali.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Nota&lt;/strong&gt;: Questa applicazione è in fase di sviluppo utilizzando Flutter e fa parte di un progetto di tesi.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;Funzionalità principali&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;funzionalità-principali&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#funzionalit%c3%a0-principali&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Creazione di attività&lt;/strong&gt;: Permette di aggiungere nuove attività con dettagli personalizzati.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Organizzazione per categorie&lt;/strong&gt;: Consente di suddividere le attività in categorie per una gestione più efficiente.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Monitoraggio dei progressi&lt;/strong&gt;: Fornisce statistiche e aggiornamenti sul completamento delle attività.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Obiettivo&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;obiettivo&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#obiettivo&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;L&amp;rsquo;obiettivo principale dell&amp;rsquo;app è aiutare gli utenti a migliorare la produttività e a gestire meglio il proprio tempo.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Per ulteriori dettagli, consulta la documentazione completa.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/apps/cli/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/apps/cli/</guid>
+      <description>
+        
+        
+        &lt;h1&gt;Documentazione dell&amp;rsquo;App CLI&lt;/h1&gt;&lt;h2&gt;Panoramica&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;panoramica&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#panoramica&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;L&amp;rsquo;app CLI si trova in &lt;code&gt;apps/cli&lt;/code&gt; all&amp;rsquo;interno di questa monorepo. Avviala con:&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx:relative hx:mt-6 hx:first:mt-0 hx:group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;python apps/cli&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx:opacity-0 hx:transition hx:group-hover/code:opacity-100 hx:flex hx:gap-1 hx:absolute hx:m-[11px] hx:right-0 hx:top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx:group/copybtn hx:cursor-pointer hx:transition-all hx:active:opacity-50 hx:bg-primary-700/5 hx:border hx:border-black/5 hx:text-gray-600 hx:hover:text-gray-900 hx:rounded-md hx:p-1.5 hx:dark:bg-primary-300/10 hx:dark:border-white/10 hx:dark:text-gray-400 hx:dark:hover:text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;hextra-copy-icon hx:group-[.copied]/copybtn:hidden hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+&lt;div class=&#34;hextra-success-icon hx:hidden hx:group-[.copied]/copybtn:block hx:pointer-events-none hx:h-4 hx:w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;Consulta la figura per un esempio.&lt;/p&gt;
+&lt;p&gt;
+    &lt;img src=&#34;../cli-screenshot.png&#34; alt=&#34;alt text&#34;  loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/dataflow/genbook/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/dataflow/genbook/</guid>
+      <description>
+        
+        
+        &lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  flowchart TD
+     subgraph Interazione con l&amp;#39;Utente
+          A[App / CLI] --&amp;gt;|Crea Richiesta GenBook| B[Gateway API]
+     end
+
+     subgraph Nucleo del Sistema
+          B --&amp;gt;|Genera ID Lavoro, Crea Stato GenBook| C[MongoDB]
+          B --&amp;gt;|Pubblica Lavoro su Kafka| D[Topic Kafka: book-queue]
+     end
+
+     subgraph Pipeline di Elaborazione Kafka
+          D --&amp;gt;|Consuma Lavoro| E[prompt-enricher]
+          E --&amp;gt;|Espande il prompt con link| E
+          E --&amp;gt;|Pubblica prompt arricchito| F[Topic Kafka: enriched_prompts]
+
+          F --&amp;gt;|Consuma prompt arricchito| G[instructional-designer]
+          G --&amp;gt;|Genera struttura libro e info arricchimento paragrafi| G
+          G --&amp;gt;|Pubblica struttura libro| H[Topic Kafka: book-structure]
+          G --&amp;gt;|Pubblica info arricchimento paragrafi| I[Topic Kafka: paragraph-enrichment]
+
+          I --&amp;gt;|Consuma info arricchimento paragrafi| J[paragraph-enricher]
+          J --&amp;gt;|Genera testo Markdown dalle info| J
+          J --&amp;gt;|Pubblica paragrafo arricchito| K[Topic Kafka: enriched-paragraphs]
+     end
+
+     subgraph Aggregazione Finale
+          H --&amp;gt;|Consuma struttura libro| L[book-aggregator]
+          K --&amp;gt;|Consuma paragrafi arricchiti| L
+          L --&amp;gt;|Aggrega e costruisce il libro finale| L
+          L --&amp;gt;|Pubblica libro finale| M[Topic Kafka: generated-books]
+          M --&amp;gt;|Aggiorna Stato GenBook in MongoDB| C
+     end
+
+     subgraph Archiviazione dei Dati e Logging
+          C -- Stato GenBook --&amp;gt; X{Dati}
+          subgraph Stack ELK
+                E --&amp;gt; Z[Logstash]
+                G --&amp;gt; Z
+                J --&amp;gt; Z
+                L --&amp;gt; Z
+                Z --&amp;gt; Y[Elasticsearch]
+          end
+     end
+&lt;/pre&gt;&lt;h1&gt;Documentazione del Flusso di Dati di GenBook&lt;/h1&gt;&lt;h2&gt;Panoramica&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;panoramica&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#panoramica&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;Questo documento descrive il flusso di dati del sistema GenBook, basandosi sul diagramma del flusso di dati. Il sistema è suddiviso in quattro sezioni principali:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Interazione con l&amp;rsquo;Utente&lt;/strong&gt;: L&amp;rsquo;utente interagisce con il sistema tramite un&amp;rsquo;applicazione o CLI, avviando la creazione di una richiesta GenBook che viene gestita dal Gateway API.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Nucleo del Sistema&lt;/strong&gt;: Il Gateway API genera un ID lavoro unico, aggiorna lo stato in MongoDB e pubblica il lavoro su un topic Kafka per l&amp;rsquo;elaborazione.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Pipeline di Elaborazione Kafka&lt;/strong&gt;: Una serie di microservizi elabora i dati, arricchendo i prompt, generando la struttura del libro e i paragrafi arricchiti.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Aggregazione Finale e Archiviazione&lt;/strong&gt;: I dati vengono aggregati per costruire il libro finale, pubblicati su un topic Kafka e archiviati in MongoDB. I log vengono raccolti dallo stack ELK per il monitoraggio.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Ogni componente e processo è rappresentato nel diagramma sopra.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/infrastruttura/kafka/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/infrastruttura/kafka/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Topic di Kafka&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;topic-di-kafka&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#topic-di-kafka&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Riquadro per raggruppare i topic di Kafka
+    subgraph KAFKA
+        direction TB;
+
+        %% Lista dei topic (ovals)
+        t1(book-queue);
+        t2(enriched-prompt);
+        t3(book-structures);
+        t4(paragraphs);
+        t5(enriched-paragraphs);
+        t6(generated-books);
+    end
+&lt;/pre&gt;&lt;p&gt;I topic di Kafka rappresentano i canali di comunicazione utilizzati per lo scambio di messaggi tra i vari microservizi. Ogni topic è identificato da un nome univoco e funge da buffer per i dati che vengono prodotti e consumati dai servizi. Nel diagramma sopra, i topic sono rappresentati come ovali e sono raggruppati all&amp;rsquo;interno del riquadro &amp;ldquo;KAFKA&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;Ecco una breve descrizione dei topic:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;book-queue&lt;/strong&gt;: Contiene le richieste iniziali inviate dall&amp;rsquo;API Gateway.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;enriched-prompt&lt;/strong&gt;: Memorizza i prompt arricchiti dal microservizio &lt;code&gt;prompt-enricher&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;book-structures&lt;/strong&gt;: Contiene le strutture dei libri generate dal microservizio &lt;code&gt;instructional-designer&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;paragraphs&lt;/strong&gt;: Raccoglie i paragrafi generati dal microservizio &lt;code&gt;instructional-designer&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;enriched-paragraphs&lt;/strong&gt;: Contiene i paragrafi arricchiti dal microservizio &lt;code&gt;paragraph-enricher&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;generated-books&lt;/strong&gt;: Memorizza i libri completi generati dal microservizio &lt;code&gt;book-aggregator&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Flusso lavorativo&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-lavorativo&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-lavorativo&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Start
+    api_gateway[API Gateway];
+
+    %% Topics (ovals)
+    t1(book-queue);
+    t2(enriched-prompt);
+    t3(book-structures);
+    t4(paragraphs);
+    t5(enriched-paragraphs);
+    t6(generated-books);
+
+    %% Microservices (rectangles)
+    ms1[prompt-enricher];
+    ms2[instructional-designer];
+    ms3[paragraph-enricher];
+    ms4[book-aggregator];
+    ms5[book-producer];
+
+    %% Flow
+    api_gateway --&amp;gt; t1;
+    t1 --&amp;gt; ms1;
+    ms1 --&amp;gt; t2;
+    t2 --&amp;gt; ms2;
+    ms2 --&amp;gt; t3;
+    ms2 --&amp;gt; t4;
+    t4 --&amp;gt; ms3;
+    ms3 --&amp;gt; t5;
+    t3 --&amp;gt; ms4;
+    t5 --&amp;gt; ms4;
+    ms4 --&amp;gt; t6;
+    t6 --&amp;gt; ms5;
+&lt;/pre&gt;&lt;p&gt;Il flusso lavorativo illustra come i dati si muovono attraverso i vari microservizi e i topic di Kafka. Ecco una descrizione passo-passo del processo:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;API Gateway&lt;/strong&gt;: Riceve le richieste iniziali e le invia al topic &lt;code&gt;book-queue&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Prompt Enricher&lt;/strong&gt;: Consuma i messaggi da &lt;code&gt;book-queue&lt;/code&gt;, arricchisce i prompt e li pubblica su &lt;code&gt;enriched-prompt&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Instructional Designer&lt;/strong&gt;: Consuma i prompt arricchiti da &lt;code&gt;enriched-prompt&lt;/code&gt; e genera sia le strutture dei libri (&lt;code&gt;book-structures&lt;/code&gt;) che i paragrafi (&lt;code&gt;paragraphs&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Paragraph Enricher&lt;/strong&gt;: Consuma i paragrafi da &lt;code&gt;paragraphs&lt;/code&gt;, li arricchisce e li pubblica su &lt;code&gt;enriched-paragraphs&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Book Aggregator&lt;/strong&gt;: Combina le strutture dei libri (&lt;code&gt;book-structures&lt;/code&gt;) e i paragrafi arricchiti (&lt;code&gt;enriched-paragraphs&lt;/code&gt;) per creare libri completi, che vengono pubblicati su &lt;code&gt;generated-books&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Book Producer&lt;/strong&gt;: Consuma i libri completi da &lt;code&gt;generated-books&lt;/code&gt; e li rende disponibili per ulteriori utilizzi o distribuzione.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Questo flusso garantisce una pipeline modulare e scalabile per la generazione e l&amp;rsquo;arricchimento dei contenuti. Ogni microservizio è responsabile di un compito specifico, facilitando la manutenzione e l&amp;rsquo;estensibilità del sistema.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>http://localhost:1313/docs/infrastruttura/spark/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/infrastruttura/spark/</guid>
+      <description>
+        
+        
+        &lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    subgraph &amp;#34;Sorgente Dati&amp;#34;
+        kafka[Kafka]
+    end
+
+    subgraph &amp;#34;Microservizi Driver Spark&amp;#34;
+        prompt_enricher[&amp;#34;prompt-enricher&amp;#34;]
+        instructional_designer[&amp;#34;instructional-designer&amp;#34;]
+        paragraph_enricher[&amp;#34;paragraph-enricher&amp;#34;]
+    end
+
+    subgraph &amp;#34;Processing &amp;amp; AI&amp;#34;
+        spark[Spark]
+        gemini[Gemini API]
+    end
+
+    %% Flusso da Kafka ai microservizi
+    kafka &amp;lt;--&amp;gt; prompt_enricher;
+    kafka &amp;lt;--&amp;gt; instructional_designer;
+    kafka &amp;lt;--&amp;gt; paragraph_enricher;
+
+    %% Flusso dai microservizi a Spark
+    prompt_enricher --&amp;gt; spark;
+    instructional_designer --&amp;gt; spark;
+    paragraph_enricher --&amp;gt; spark;
+
+    %% Flusso da Spark a Gemini
+    spark --&amp;gt; gemini;
+&lt;/pre&gt;&lt;h3&gt;Documentazione Spark&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;documentazione-spark&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#documentazione-spark&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Questo documento descrive l&amp;rsquo;architettura e il flusso di dati che coinvolgono Spark all&amp;rsquo;interno del nostro sistema. La configurazione utilizza Kafka 4.0.0 come sorgente dati e PySpark per l&amp;rsquo;elaborazione.&lt;/p&gt;
+&lt;h4&gt;Flusso dei Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dei-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dei-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Sorgente Dati&lt;/strong&gt;: I dati vengono acquisiti da Kafka, che funge da sistema di messaggistica distribuito.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Microservizi Driver Spark&lt;/strong&gt;: I dati vengono elaborati da tre microservizi:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;prompt-enricher&lt;/code&gt;: Arricchisce i dati con informazioni aggiuntive.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;instructional-designer&lt;/code&gt;: Progetta istruzioni basate sui dati.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;paragraph-enricher&lt;/code&gt;: Migliora i paragrafi con contenuti generati.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Processing &amp;amp; AI&lt;/strong&gt;: I dati elaborati dai microservizi vengono inviati a Spark per ulteriori trasformazioni e analisi. Infine, i risultati vengono inviati all&amp;rsquo;API Gemini per l&amp;rsquo;integrazione con i sistemi di intelligenza artificiale.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4&gt;Tecnologie Utilizzate&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;tecnologie-utilizzate&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tecnologie-utilizzate&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Kafka 4.0.0&lt;/strong&gt;: Utilizzato per la gestione dei flussi di dati in tempo reale.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PySpark&lt;/strong&gt;: Libreria Python per l&amp;rsquo;elaborazione distribuita dei dati con Apache Spark.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;Note&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;note&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#note&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Assicurarsi che i microservizi siano configurati per leggere e scrivere correttamente da e verso Kafka.&lt;/li&gt;
+&lt;li&gt;Verificare che Spark sia configurato per ricevere input dai microservizi e inviare output all&amp;rsquo;API Gemini.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Questa architettura garantisce un&amp;rsquo;elaborazione scalabile e modulare dei dati, sfruttando le potenzialità di Kafka e Spark.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>ELK Stack</title>
+      <link>http://localhost:1313/docs/infrastruttura/elk/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/docs/infrastruttura/elk/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;Flusso Dati&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;flusso-dati&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#flusso-dati&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;pre class=&#34;mermaid hx:mt-6&#34;&gt;
+  graph LR;
+    %% Definiamo i nodi di input (topics)
+    topic1(enriched-prompts);
+    topic2(enriched-paragraphs);
+    topic3(book-structures);
+
+    %% Definiamo i servizi
+    logstash_service[Logstash];
+    elasticsearch_service[Elasticsearch];
+    kibana_service[Kibana];
+
+    %% Definiamo il flusso
+    topic1 --&amp;gt; logstash_service;
+    topic2 --&amp;gt; logstash_service;
+    topic3 --&amp;gt; logstash_service;
+    logstash_service --&amp;gt; elasticsearch_service;
+    elasticsearch_service --&amp;gt; kibana_service;
+&lt;/pre&gt;&lt;h3&gt;Descrizione del Flusso&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;descrizione-del-flusso&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#descrizione-del-flusso&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Il grafico sopra rappresenta il flusso dei dati all&amp;rsquo;interno dello stack ELK (Elasticsearch, Logstash, Kibana). Ecco una descrizione dettagliata di ogni componente e del loro ruolo:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Topics di Input&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;enriched-prompts&lt;/code&gt;: Contiene i dati relativi ai prompt arricchiti.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;enriched-paragraphs&lt;/code&gt;: Contiene i paragrafi arricchiti.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;book-structures&lt;/code&gt;: Contiene le strutture dei libri.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Questi dati rappresentano i punti di ingresso nel sistema.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Logstash&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Logstash è il servizio responsabile dell&amp;rsquo;elaborazione e della trasformazione dei dati in ingresso. Riceve i dati dai topics di input e li prepara per l&amp;rsquo;indicizzazione.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Elasticsearch&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Elasticsearch è il motore di ricerca e analisi che memorizza i dati elaborati da Logstash. Consente di eseguire ricerche rapide e analisi sui dati.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Kibana&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kibana è l&amp;rsquo;interfaccia utente che consente di visualizzare e analizzare i dati memorizzati in Elasticsearch. Fornisce dashboard interattivi e strumenti di visualizzazione.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Utilizzo&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;utilizzo&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#utilizzo&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Questo flusso è utile per gestire grandi quantità di dati strutturati e non strutturati, consentendo di trasformarli, indicizzarli e analizzarli in modo efficiente. Lo stack ELK è comunemente utilizzato per il monitoraggio, l&amp;rsquo;analisi dei log e la business intelligence.&lt;/p&gt;
+&lt;h3&gt;Vantaggi&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;vantaggi&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#vantaggi&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Scalabilità&lt;/strong&gt;: Lo stack ELK può gestire grandi volumi di dati.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Flessibilità&lt;/strong&gt;: Supporta diversi tipi di dati e consente personalizzazioni.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Visualizzazione Intuitiva&lt;/strong&gt;: Kibana offre strumenti di visualizzazione potenti e facili da usare.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Conclusione&lt;span class=&#34;hx:absolute hx:-mt-20&#34; id=&#34;conclusione&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#conclusione&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;Lo stack ELK è una soluzione completa per la gestione e l&amp;rsquo;analisi dei dati. Il flusso descritto nel grafico rappresenta un esempio di come i dati possono essere trasformati e analizzati per ottenere informazioni utili.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>
